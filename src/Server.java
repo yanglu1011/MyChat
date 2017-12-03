@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
@@ -9,6 +10,7 @@ public class Server {
 	// a vector of output streams to update on all clients
 	private Vector<ObjectOutputStream> clientOutputStreams;
 	private Vector<Integer> clientPorts;
+	private Vector<InetAddress> clientInets;
 	private Request temp = null;
 	
 	public static void main(String[] args) {
@@ -18,6 +20,7 @@ public class Server {
 	public Server() {
 		clientOutputStreams = new Vector<ObjectOutputStream>();
 		clientPorts = new Vector<Integer>();
+		clientInets = new Vector<InetAddress>();
 		
 		try {
 			@SuppressWarnings("resource")
@@ -26,6 +29,8 @@ public class Server {
 			while (true) {
 				System.out.println("waiting for connection...");
 				Socket clientSocket = serverSock.accept();
+				clientInets.add(clientSocket.getInetAddress());
+				
 //				System.out.println("port: " + clientSocket.getPort());
 //				System.out.println("Local port: " + clientSocket.getLocalPort());
 //				System.out.println("inet Address: " + clientSocket.getInetAddress());
@@ -38,7 +43,7 @@ public class Server {
 				System.out.println("Client: " + (clientOutputStreams.size() - 1));
 				
 				// use the existing paint objects to update the new client
-				temp = new Request(clientSocket, clientPorts, clientOutputStreams, clientOutputStreams.size() - 1);
+				temp = new Request(clientSocket, clientPorts, clientInets, clientOutputStreams, clientOutputStreams.size() - 1);
 
 //				clientPorts = temp.getClientPorts();
 				// start the new threads, calls run()
