@@ -39,12 +39,12 @@ public class Client extends JFrame {
 					System.out.println("got my input");
 					String[] strs = str.split("/");
 					if (strs[0].equals("disconnect")) {
-						System.out.println((clientID == Integer.parseInt(strs[1])));
 						// outputToOther.remove(clientID);
 						// inputFromOther.remove(clientID);
 						// other.remove(clientID);
-						chatArea.append("Client " + strs[1] + " disconnected\n");
-						break;
+						System.out.println("group ended");
+						inGroup = false;
+//						break;
 					} else if (strs[0].equals("group")) {
 						portText.setText(strs[1]);
 						groupButton.doClick();
@@ -207,12 +207,16 @@ public class Client extends JFrame {
 					// outputToOther.get(0).writeObject(str1 + "/" + id);
 					outputToUsers.get(port + 1).writeObject(str1 + "/" + id);
 				} else if (button.equals(disconnectButton.getText())) {
-					System.out.println("not used");
-					// chatArea.append("disconnected to Client " + (port - 1) + "\n");
-					// outputToOther.get(0).writeObject("disconnect/" + id);
-					// outputToOther.remove(0);
-					// inputFromOther.remove(0);
-					// other.remove(0);
+					String str = portText.getText();
+					if (inGroup) {
+						for (String s : strs) {
+							if (id == Integer.parseInt(s)) {
+								continue;
+							}
+							outputToUsers.get(Integer.parseInt(s) + 1).writeObject("disconnect/" + str);
+						}
+					}
+					inGroup = false;
 				} else if (button.equals(groupButton.getText())) {
 					// request everyone you are looking at
 					String str = portText.getText();
@@ -225,7 +229,6 @@ public class Client extends JFrame {
 							}
 							outputToUsers.get(Integer.parseInt(s) + 1).writeObject("group/" + str);
 						}
-						System.out.println(strs == null);
 					}
 					inGroup = true;
 
@@ -269,6 +272,8 @@ public class Client extends JFrame {
 			southPane.add(talkButton);
 			talkButton.addActionListener(new ButtonListener());
 			groupFrame.add(southPane, BorderLayout.SOUTH);
+			disconnectButton.addActionListener(new ButtonListener());
+			groupFrame.add(disconnectButton, BorderLayout.NORTH);
 		}
 
 	}
@@ -325,11 +330,11 @@ public class Client extends JFrame {
 	private static String serverIP;
 
 	public static void main(String[] args) {
-//		if (args.length != 1) {
-//			System.err.println("Must have 1 argument as server ip!");
-//			System.exit(1);
-//		}
-//		serverIP = args[0];
+		if (args.length != 1) {
+			System.err.println("Must have 1 argument as server ip!");
+			System.exit(1);
+		}
+		serverIP = args[0];
 		new Client();
 	}
 
@@ -356,8 +361,6 @@ public class Client extends JFrame {
 		JPanel north3Pane = new JPanel(new GridLayout(1, 3));
 		north3Pane.add(connectButton);
 		north3Pane.add(requestButton);
-		disconnectButton.addActionListener(new ButtonListener());
-		north3Pane.add(disconnectButton);
 		northPane.add(north3Pane);
 		this.add(northPane, BorderLayout.NORTH);
 		enterButton.addActionListener(new ButtonListener());
@@ -449,8 +452,6 @@ public class Client extends JFrame {
 
 		try {
 			Scanner s = new Scanner(System.in);
-			System.out.println("Enter Server IP: ");
-			serverIP = s.nextLine();
 			myConnect = new Socket(serverIP, 9999);
 
 			// outputToServer is used to write PaintObjects over to server
