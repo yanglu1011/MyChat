@@ -203,8 +203,14 @@ public class Client extends JFrame {
 	private JTextField chatField = new JTextField();
 
 	private int port;
+	private static String serverIP;
 
 	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.err.println("Must have 1 argument as server ip!");
+			System.exit(1);
+		}
+		serverIP = args[0];
 		new Client();
 	}
 
@@ -322,7 +328,7 @@ public class Client extends JFrame {
 		inputFromGroup = new Vector<ObjectInputStream>();
 
 		try {
-			myConnect = new Socket("192.168.2.7", 9999);
+			myConnect = new Socket(serverIP, 9999);
 
 			// outputToServer is used to write PaintObjects over to server
 			// after the second mouse click.
