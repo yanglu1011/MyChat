@@ -82,7 +82,7 @@ public class Client {
 		Socket myConnect = null;
 
 		try {
-			myConnect = new Socket("192.168.85.1", 9999);
+			myConnect = new Socket("192.168.2.7", 9999);
 
 			// outputToServer is used to write PaintObjects over to server
 			// after the second mouse click.
