@@ -43,7 +43,9 @@ public class Client {
 		@Override
 		public void run() {
 			try {
-				/** @Todo implement deny access possibly have to let server ask about the request */
+				/**
+				 * @Todo implement deny access possibly have to let server ask about the request
+				 */
 				System.out.println("may wait for connection");
 				other = ss.accept();
 				System.out.println("accepted");
@@ -82,7 +84,7 @@ public class Client {
 		Socket myConnect = null;
 
 		try {
-			myConnect = new Socket("192.168.85.1", 9999);
+			myConnect = new Socket("192.168.2.7", 9999);
 
 			// outputToServer is used to write PaintObjects over to server
 			// after the second mouse click.
@@ -92,7 +94,7 @@ public class Client {
 			Scanner s = new Scanner(System.in);
 
 			outputToServer.writeObject("set");
-			
+
 			int port = (int) inputFromServer.readObject();
 
 			Thread listen = new Thread(new PortListen(port));
@@ -111,9 +113,12 @@ public class Client {
 					for (Integer i : availableClients) {
 						System.out.println("-- " + i);
 					}
+				} else if (command.equals("connect")) {
 					System.out.println("enter a port");
 					int num = s.nextInt();
-					connectClient = new Socket("localhost", num);
+					outputToServer.writeObject("connect " + num);
+					String host = (String) inputFromServer.readObject();
+					connectClient = new Socket(host, num);
 					outputToOther = new ObjectOutputStream(connectClient.getOutputStream());
 					inputFromOther = new ObjectInputStream(connectClient.getInputStream());
 					canTalk = (boolean) inputFromOther.readObject();
