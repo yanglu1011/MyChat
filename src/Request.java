@@ -3,7 +3,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
 public class Request implements Runnable {
@@ -51,12 +50,16 @@ public class Request implements Runnable {
 					clientOutputStreams.get(clientID).reset();
 					clientOutputStreams.get(clientID).writeObject(clientPorts);
 					clientOutputStreams.get(clientID).flush();
-				} else if (strs[0].equals("connect")) {
+				}
+				// sent the ip address of the client
+				else if (strs[0].equals("connect")) {
 					int i = Integer.parseInt(strs[1]);
 					clientOutputStreams.get(clientID).reset();
 					clientOutputStreams.get(clientID).writeObject(clientInets.get(i - 1).getHostAddress());
 					clientOutputStreams.get(clientID).flush();
-				} else if (strs[0].equals("set")) {
+				}
+				// set ports to corresponding client
+				else if (strs[0].equals("set")) {
 					clientOutputStreams.get(clientID).reset();
 					// must be clientID + 1 because port 0 doesn't work
 					clientOutputStreams.get(clientID).writeObject(clientID + 1);
