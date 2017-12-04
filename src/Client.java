@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
-import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -53,9 +52,26 @@ public class Client extends JFrame {
 
 						outputToUsers.get(i).writeObject(id + 1);
 					}
+
+					Vector<Integer> availableClients = (Vector<Integer>) inputFromServer.readObject();
+					System.out.println("available clients: ");
+					clients.setEditable(false);
+					clients.setText("");
+					clients.append("available clients: \n");
+					for (Integer i : availableClients) {
+						System.out.println("-- " + i);
+						clients.append("Client " + (i - 1) + " ID " + (i - 1) + "\n");
+					}
+
+					if (otherFrame == null) {
+						otherFrame = new JFrame();
+						otherFrame.setTitle("Clients");
+						otherFrame.setResizable(false);
+						otherFrame.add(clients);
+						otherFrame.setSize(500, 400);
+					}
 				}
 			} catch (IOException | ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -79,12 +95,10 @@ public class Client extends JFrame {
 					System.out.println("got my input");
 					String[] strs = str.split("/");
 					if (strs[0].equals("disconnect")) {
-						// outputToOther.remove(clientID);
-						// inputFromOther.remove(clientID);
-						// other.remove(clientID);
-						System.out.println("group ended");
+						groupArea.append("group ended\n");
 						inGroup = false;
-						// break;
+						groupFrame.setVisible(false);
+						groupArea.setText("");
 					} else if (strs[0].equals("group")) {
 						portText.setText(strs[1]);
 						groupButton.doClick();
@@ -95,10 +109,8 @@ public class Client extends JFrame {
 						System.out.println("Client " + strs[1] + " said: " + strs[0]);
 						chatArea.append("Client " + strs[1] + " said: " + strs[0] + "\n");
 					}
-					// replyNum = Integer.parseInt(strs[1]);
 				}
 			} catch (ClassNotFoundException | IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -123,20 +135,11 @@ public class Client extends JFrame {
 		@Override
 		public void run() {
 			try {
-				/**
-				 * @Todo implement deny access possibly have to let server ask about the request
-				 */
 				int i = 1;
 				while (true) {
 					System.out.println("may wait for connection");
-					// other.add(ss.accept());
 					Socket temp = ss.accept();
 					System.out.println("accepted");
-					// canTalk = true;
-					// outputToOther.add(new ObjectOutputStream(other.get(other.size() -
-					// 1).getOutputStream()));
-					// inputFromOther.add(new ObjectInputStream(other.get(other.size() -
-					// 1).getInputStream()));
 
 					ObjectOutputStream oos = new ObjectOutputStream(temp.getOutputStream());
 					ObjectInputStream ois = new ObjectInputStream(temp.getInputStream());
@@ -147,17 +150,11 @@ public class Client extends JFrame {
 					outputToRecieve.put(otherID, oos);
 					inputFromRecieve.put(otherID, ois);
 
-					// int i = (int) inputFromOther.get(other.size() - 1).readObject();
-
-					// chatArea.append("connection from Client " + i + "\n");
-					// outputToOther.writeObject(canTalk);
 					System.out.println("start");
 					Thread talk = new Thread(new Chat(otherID));
 					talk.start();
-					// i++;
 				}
 			} catch (IOException | ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -166,80 +163,20 @@ public class Client extends JFrame {
 
 	private class ButtonListener implements ActionListener {
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String button = ((JButton) e.getSource()).getText();
-			Socket connectClient = null;
 			try {
 				if (button.equals(requestButton.getText())) {
-					outputToServer.writeObject("request");
-
-					Vector<Integer> availableClients = (Vector<Integer>) inputFromServer.readObject();
-					System.out.println("available clients: ");
-					clients.setText("");
-					clients.append("available clients: \n");
-					for (Integer i : availableClients) {
-						System.out.println("-- " + i);
-						clients.append("Client " + (i - 1) + " ID " + (i - 1) + "\n");
-					}
-
-					if (otherFrame == null) {
-						otherFrame = new JFrame();
-						otherFrame.setTitle("Clients");
-						otherFrame.add(clients);
-						otherFrame.setSize(500, 400);
-						otherFrame.setVisible(true);
-						otherFrame.setLocation(getLocation());
-					} else {
-						otherFrame.setLocation(getLocation());
-						otherFrame.setVisible(true);
-					}
-				} else if (button.equals(connectButton.getText())) {
-					// System.out.println("enter a port");
-					// // port = Integer.parseInt(portText.getText());
-					// outputToServer.writeObject("connect");
-					// Hashtable<Integer, String> userDatabase = (Hashtable<Integer, String>)
-					// inputFromServer.readObject();
-					//
-					// for (int i = 1; i < userDatabase.size() + 1; i++) {
-					// if (i == id + 1) {
-					// continue;
-					// }
-					// // connected to them
-					// System.out.println(userDatabase.get(i));
-					//
-					// System.out.println(i);
-					// Socket temp = new Socket(userDatabase.get(i), i);
-					//
-					// users.put(i, temp);
-					// outputToUsers.put(i, new ObjectOutputStream(temp.getOutputStream()));
-					// inputFromUsers.put(i, new ObjectInputStream(temp.getInputStream()));
-					//
-					// outputToUsers.get(i).writeObject(id + 1);
-					//
-					// System.out.println("start chat with " + i);
-					// // Thread talk = new Thread(new Chat(i));
-					// // talk.start();
-					// }
-					// connectClient = new Socket(host, port);
-					// outputToOther.add(new ObjectOutputStream(connectClient.getOutputStream()));
-					// inputFromOther.add(new ObjectInputStream(connectClient.getInputStream()));
-					// other.add(connectClient);
-					// outputToOther.get(0).writeObject(id);
-					// canTalk = (boolean) inputFromOther.get(inputFromOther.size() -
-					// 1).readObject();
-					chatField.setEditable(true);
-					// chatArea.append("connected to Client " + (port - 1) + "\n");
-					// Thread talk = new Thread(new Chat(other.size() - 1));
-					// talk.start();
+					otherFrame.setVisible(true);
+					otherFrame.setLocation(getLocation());
 				} else if (button.equals(sendButton.getText())) {
 					System.out.println("say something");
 					String str1 = chatField.getText();
+
+					chatArea.append("You said: " + str1 + "\n");
+
 					port = Integer.parseInt(portText.getText());
-					// outputToOther.reset();
-					// write who it is from so reply is possible
-					// outputToOther.get(0).writeObject(str1 + "/" + id);
 					outputToUsers.get(port + 1).writeObject(str1 + "/" + id);
 				} else if (button.equals(disconnectButton.getText())) {
 					String str = portText.getText();
@@ -251,7 +188,10 @@ public class Client extends JFrame {
 							outputToUsers.get(Integer.parseInt(s) + 1).writeObject("disconnect/" + str);
 						}
 					}
+					groupArea.append("group ended\n");
 					inGroup = false;
+					groupFrame.setVisible(false);
+					groupArea.setText("");
 				} else if (button.equals(groupButton.getText())) {
 					// request everyone you are looking at
 					String str = portText.getText();
@@ -271,11 +211,13 @@ public class Client extends JFrame {
 					if (groupFrame == null) {
 						groupFrame = new JFrame();
 						groupFrame.setTitle("Group with: " + str);
+						groupFrame.setResizable(false);
 						addGroupButtons();
 						groupFrame.setSize(500, 600);
 						groupFrame.setVisible(true);
 						groupFrame.setLocation(getLocation());
 					} else {
+						groupFrame.setTitle("Group with: " + str);
 						groupFrame.setLocation(getLocation());
 						groupFrame.setVisible(true);
 					}
@@ -285,6 +227,8 @@ public class Client extends JFrame {
 					System.out.println("say something");
 					String str = groupField.getText();
 
+					groupArea.append("You said: " + str + "\n");
+
 					for (String s : strs) {
 						if (id == Integer.parseInt(s)) {
 							continue;
@@ -292,8 +236,7 @@ public class Client extends JFrame {
 						outputToUsers.get(Integer.parseInt(s) + 1).writeObject(str + "/" + id);
 					}
 				}
-			} catch (IOException | ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
+			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		}
@@ -318,32 +261,24 @@ public class Client extends JFrame {
 	// output stream to server
 	private ObjectOutputStream outputToServer;
 	private ObjectInputStream inputFromServer;
-	private Vector<Socket> other;
-	private Vector<ObjectOutputStream> outputToOther = null;
-	private Vector<ObjectInputStream> inputFromOther = null;
 
-	// possibly used for group chatting
-	private Vector<Socket> group;
-	private Vector<ObjectOutputStream> outputToGroup = null;
-	private Vector<ObjectInputStream> inputFromGroup = null;
-
+	// storage for intput and output to other users
 	private Hashtable<Integer, Socket> users = new Hashtable<Integer, Socket>();
 	private Hashtable<Integer, ObjectOutputStream> outputToUsers = new Hashtable<Integer, ObjectOutputStream>();
 	private Hashtable<Integer, ObjectInputStream> inputFromUsers = new Hashtable<Integer, ObjectInputStream>();
 
+	// storage for input and output to receive from other users
 	private Hashtable<Integer, Socket> recieve = new Hashtable<Integer, Socket>();
 	private Hashtable<Integer, ObjectOutputStream> outputToRecieve = new Hashtable<Integer, ObjectOutputStream>();
 	private Hashtable<Integer, ObjectInputStream> inputFromRecieve = new Hashtable<Integer, ObjectInputStream>();
 
-	// private boolean canTalk = false;
 	// my id
 	private int id;
-	// private int replyNum = 0;
 	private boolean inGroup = false;
 
 	// Buttons
 	private JButton requestButton = new JButton("Request");
-	private JButton connectButton = new JButton("Connect");
+	// private JButton connectButton = new JButton("Connect");
 	private JButton talkButton = new JButton("Talk");
 	private JButton groupButton = new JButton("Group");
 	private JButton disconnectButton = new JButton("Disconnect");
@@ -384,8 +319,6 @@ public class Client extends JFrame {
 		this.setResizable(false);
 
 		addButtons();
-
-		// enterCommands();
 	}
 
 	private void addButtons() {
@@ -394,8 +327,7 @@ public class Client extends JFrame {
 		JPanel northPane = new JPanel(new GridLayout(3, 1));
 		northPane.add(portLabel);
 		northPane.add(portText);
-		JPanel north3Pane = new JPanel(new GridLayout(1, 3));
-		north3Pane.add(connectButton);
+		JPanel north3Pane = new JPanel(new GridLayout(1, 1));
 		north3Pane.add(requestButton);
 		northPane.add(north3Pane);
 		this.add(northPane, BorderLayout.NORTH);
@@ -404,7 +336,7 @@ public class Client extends JFrame {
 		JPanel northSouthPane = new JPanel();
 		sendButton.addActionListener(new ButtonListener());
 
-		chatField.setEditable(false);
+		chatField.setEditable(true);
 		northSouthPane.setLayout(new GridLayout(1, 2));
 		northSouthPane.add(chatField);
 		northSouthPane.add(sendButton);
@@ -413,7 +345,6 @@ public class Client extends JFrame {
 		groupButton.addActionListener(new ButtonListener());
 		requestButton.addActionListener(new ButtonListener());
 		this.add(southPane, BorderLayout.SOUTH);
-		connectButton.addActionListener(new ButtonListener());
 		JScrollPane jsp = new JScrollPane(chatArea);
 		jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		chatArea.setEditable(false);
@@ -422,29 +353,17 @@ public class Client extends JFrame {
 
 	private void connectToServer() {
 		Socket myConnect = null;
-		other = new Vector<Socket>();
-		outputToOther = new Vector<ObjectOutputStream>();
-		inputFromOther = new Vector<ObjectInputStream>();
-
-		group = new Vector<Socket>();
-		outputToGroup = new Vector<ObjectOutputStream>();
-		inputFromGroup = new Vector<ObjectInputStream>();
 
 		try {
-			Scanner s = new Scanner(System.in);
 			myConnect = new Socket(serverIP, 9999);
 
-			// outputToServer is used to write PaintObjects over to server
-			// after the second mouse click.
 			outputToServer = new ObjectOutputStream(myConnect.getOutputStream());
 
 			inputFromServer = new ObjectInputStream(myConnect.getInputStream());
 
-//			outputToServer.writeObject("set");
-
 			int port = (int) inputFromServer.readObject();
 			id = port - 1;
-
+			System.out.println("id " + id);
 			Thread listen = new Thread(new PortListen(port));
 			listen.start();
 			Thread update = new Thread(new UpdateClients());
@@ -452,7 +371,6 @@ public class Client extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

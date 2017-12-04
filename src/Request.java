@@ -50,35 +50,24 @@ public class Request implements Runnable {
 				output.reset();
 				output.writeObject(userDatabase);
 				output.flush();
+				output.reset();
+				output.writeObject(clientPorts);
+				output.flush();
 			}
 
-			while (true) {
-				System.out.println("from client " + clientID);
+			System.out.println("from client " + clientID);
 
-				String str = (String) reader.readObject();
-				String[] strs = str.split(" ");
+//			String str = (String) reader.readObject();
 
-				System.out.println("Client: " + str);
+//			System.out.println("Client: " + str);
 
-				if (strs[0].equals("request")) {
-					clientOutputStreams.get(clientID).reset();
-					clientOutputStreams.get(clientID).writeObject(clientPorts);
-					clientOutputStreams.get(clientID).flush();
-				}
-				// sent the ip address of the client
-				else if (strs[0].equals("connect")) {
-					// clientOutputStreams.get(clientID).reset();
-					// clientOutputStreams.get(clientID).writeObject(userDatabase);
-					// clientOutputStreams.get(clientID).flush();
-					// int i = Integer.parseInt(strs[1]);
-					// clientOutputStreams.get(clientID).reset();
-					// clientOutputStreams.get(clientID).writeObject(clientInets.get(i -
-					// 1).getHostAddress());
-					// clientOutputStreams.get(clientID).flush();
-				}
-			}
+//			if (str.equals("request")) {
+//				clientOutputStreams.get(clientID).reset();
+//				clientOutputStreams.get(clientID).writeObject(clientPorts);
+//				clientOutputStreams.get(clientID).flush();
+//			}
 
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException e) {
 			System.out.println("connection reset");
 			e.printStackTrace();
 		}
