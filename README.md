@@ -1,1 +1,4 @@
 # MyChat
+Use Request button to see who is "online" or connected to the server. Since this client itself is also connected to the server, just don't try to talk to itself. so if client 0 is looking at the people "online". when chatting client 0 should enter in the text box that says "Enter the id of User", client 0 should enter any id that is not 0 and online.
+To talk make sure the user id text box have an id number in it and type the message in the box below and click send to sent message.
+When making a group, use the pattern "id,id,id". So in "Enter the id of User box" type in 0,1,2 to make a group for client 0, client 1, and client 2. Make sure the client that is creating the chat is included in the id box. Then just click group to start up the group chat. Click disconnect when group chat is done, so a new group can be created.
