@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -19,7 +18,7 @@ public class Request implements Runnable {
 	// the input stream from clientSocket
 	private ObjectInputStream reader;
 	// the address of the machine location of the client
-//	private Vector<InetAddress> clientInets;
+	// private Vector<InetAddress> clientInets;
 	// userDatabase that gets to be send to everyone
 	private Hashtable<Integer, String> userDatabase;
 
@@ -41,6 +40,18 @@ public class Request implements Runnable {
 	@Override
 	public void run() {
 		try {
+			// when client first connected
+			clientOutputStreams.get(clientID).reset();
+			// must be clientID + 1 because port 0 doesn't work
+			clientOutputStreams.get(clientID).writeObject(clientID + 1);
+			clientOutputStreams.get(clientID).flush();
+			// broadcast
+			for (ObjectOutputStream output : clientOutputStreams) {
+				output.reset();
+				output.writeObject(userDatabase);
+				output.flush();
+			}
+
 			while (true) {
 				System.out.println("from client " + clientID);
 
@@ -56,23 +67,14 @@ public class Request implements Runnable {
 				}
 				// sent the ip address of the client
 				else if (strs[0].equals("connect")) {
-					clientOutputStreams.get(clientID).reset();
-					clientOutputStreams.get(clientID).writeObject(userDatabase);
-					clientOutputStreams.get(clientID).flush();
-//					int i = Integer.parseInt(strs[1]);
-//					clientOutputStreams.get(clientID).reset();
-//					clientOutputStreams.get(clientID).writeObject(clientInets.get(i - 1).getHostAddress());
-//					clientOutputStreams.get(clientID).flush();
-				}
-				// set ports to corresponding client
-				else if (strs[0].equals("set")) {
-					clientOutputStreams.get(clientID).reset();
-					// must be clientID + 1 because port 0 doesn't work
-					clientOutputStreams.get(clientID).writeObject(clientID + 1);
-					// broadcast
-//					for (ObjectOutputStream output : clientOutputStreams) {
-//					}
-					clientOutputStreams.get(clientID).flush();
+					// clientOutputStreams.get(clientID).reset();
+					// clientOutputStreams.get(clientID).writeObject(userDatabase);
+					// clientOutputStreams.get(clientID).flush();
+					// int i = Integer.parseInt(strs[1]);
+					// clientOutputStreams.get(clientID).reset();
+					// clientOutputStreams.get(clientID).writeObject(clientInets.get(i -
+					// 1).getHostAddress());
+					// clientOutputStreams.get(clientID).flush();
 				}
 			}
 

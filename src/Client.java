@@ -22,6 +22,46 @@ import javax.swing.ScrollPaneConstants;
 
 public class Client extends JFrame {
 
+	private class UpdateClients implements Runnable {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void run() {
+			try {
+				while (true) {
+					Hashtable<Integer, String> userDatabase = (Hashtable<Integer, String>) inputFromServer.readObject();
+					System.out.println("updated");
+					users = new Hashtable<>();
+					outputToUsers = new Hashtable<>();
+					inputFromUsers = new Hashtable<>();
+
+					for (int i = 1; i < userDatabase.size() + 1; i++) {
+						if (i == id + 1) {
+							continue;
+						}
+						// connected to them
+						System.out.println(userDatabase.get(i));
+
+						System.out.println(i);
+						Socket temp;
+
+						temp = new Socket(userDatabase.get(i), i);
+
+						users.put(i, temp);
+						outputToUsers.put(i, new ObjectOutputStream(temp.getOutputStream()));
+						inputFromUsers.put(i, new ObjectInputStream(temp.getInputStream()));
+
+						outputToUsers.get(i).writeObject(id + 1);
+					}
+				}
+			} catch (IOException | ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	private class Chat implements Runnable {
 
 		private int clientID;
@@ -44,7 +84,7 @@ public class Client extends JFrame {
 						// other.remove(clientID);
 						System.out.println("group ended");
 						inGroup = false;
-//						break;
+						// break;
 					} else if (strs[0].equals("group")) {
 						portText.setText(strs[1]);
 						groupButton.doClick();
@@ -156,36 +196,32 @@ public class Client extends JFrame {
 						otherFrame.setVisible(true);
 					}
 				} else if (button.equals(connectButton.getText())) {
-					System.out.println("enter a port");
-					// port = Integer.parseInt(portText.getText());
-					outputToServer.writeObject("connect");
-					System.out.println("here1");
-					Hashtable<Integer, String> userDatabase = (Hashtable<Integer, String>) inputFromServer.readObject();
-					System.out.println("here2");
-
-					for (int i = 1; i < userDatabase.size() + 1; i++) {
-						if (i == id + 1) {
-							continue;
-						}
-						// connected to them
-						System.out.println("here3");
-						System.out.println(userDatabase.get(i));
-
-						System.out.println(i);
-						Socket temp = new Socket(userDatabase.get(i), i);
-
-						users.put(i, temp);
-						outputToUsers.put(i, new ObjectOutputStream(temp.getOutputStream()));
-						inputFromUsers.put(i, new ObjectInputStream(temp.getInputStream()));
-
-						outputToUsers.get(i).writeObject(id + 1);
-
-						System.out.println("start chat with " + i);
-						// Thread talk = new Thread(new Chat(i));
-						// talk.start();
-						System.out.println("here4");
-					}
-					System.out.println("here5");
+					// System.out.println("enter a port");
+					// // port = Integer.parseInt(portText.getText());
+					// outputToServer.writeObject("connect");
+					// Hashtable<Integer, String> userDatabase = (Hashtable<Integer, String>)
+					// inputFromServer.readObject();
+					//
+					// for (int i = 1; i < userDatabase.size() + 1; i++) {
+					// if (i == id + 1) {
+					// continue;
+					// }
+					// // connected to them
+					// System.out.println(userDatabase.get(i));
+					//
+					// System.out.println(i);
+					// Socket temp = new Socket(userDatabase.get(i), i);
+					//
+					// users.put(i, temp);
+					// outputToUsers.put(i, new ObjectOutputStream(temp.getOutputStream()));
+					// inputFromUsers.put(i, new ObjectInputStream(temp.getInputStream()));
+					//
+					// outputToUsers.get(i).writeObject(id + 1);
+					//
+					// System.out.println("start chat with " + i);
+					// // Thread talk = new Thread(new Chat(i));
+					// // talk.start();
+					// }
 					// connectClient = new Socket(host, port);
 					// outputToOther.add(new ObjectOutputStream(connectClient.getOutputStream()));
 					// inputFromOther.add(new ObjectInputStream(connectClient.getInputStream()));
@@ -193,7 +229,6 @@ public class Client extends JFrame {
 					// outputToOther.get(0).writeObject(id);
 					// canTalk = (boolean) inputFromOther.get(inputFromOther.size() -
 					// 1).readObject();
-					System.out.println("start");
 					chatField.setEditable(true);
 					// chatArea.append("connected to Client " + (port - 1) + "\n");
 					// Thread talk = new Thread(new Chat(other.size() - 1));
@@ -227,6 +262,7 @@ public class Client extends JFrame {
 							if (id == Integer.parseInt(s)) {
 								continue;
 							}
+							System.out.println("id: " + Integer.parseInt(s) + 1);
 							outputToUsers.get(Integer.parseInt(s) + 1).writeObject("group/" + str);
 						}
 					}
@@ -384,62 +420,6 @@ public class Client extends JFrame {
 		this.add(jsp, BorderLayout.CENTER);
 	}
 
-	// @SuppressWarnings("unchecked")
-	// private void enterCommands() {
-	// Socket connectClient = null;
-	// Scanner s = new Scanner(System.in);
-	// try {
-	// while (s.hasNextLine()) {
-	// String command = s.nextLine();
-	//
-	// // request people that can connect
-	// if (command.equals("request")) {
-	// // request for available ports
-	// outputToServer.writeObject(command);
-	// Vector<Integer> availableClients = (Vector<Integer>)
-	// inputFromServer.readObject();
-	// System.out.println("available client ports: ");
-	// for (Integer i : availableClients) {
-	// System.out.println("-- " + i);
-	// }
-	// }
-	// // request for connection on the person
-	// else if (command.equals("connect")) {
-	// System.out.println("enter a port");
-	// int num = s.nextInt();
-	// outputToServer.writeObject("connect " + num);
-	// String host = (String) inputFromServer.readObject();
-	// connectClient = new Socket(host, num);
-	// outputToOther.add(new ObjectOutputStream(connectClient.getOutputStream()));
-	// inputFromOther.add(new ObjectInputStream(connectClient.getInputStream()));
-	// other.add(connectClient);
-	// // canTalk = (boolean) inputFromOther.get(inputFromOther.size() -
-	// // 1).readObject();
-	// System.out.println("start");
-	// Thread talk = new Thread(new Chat(other.size() - 1));
-	// talk.start();
-	// }
-	// // talk to the person
-	// else if (command.equals("talk")) {
-	// System.out.println("say something");
-	// String str1 = s.nextLine();
-	// // outputToOther.reset();
-	// // write who it is from so reply is possible
-	// outputToOther.get(0).writeObject(str1 + "/" + id);
-	// // outputToOther.flush();
-	// } else {
-	// System.out.println("try a valid command");
-	// continue;
-	// }
-	// }
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// } catch (ClassNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-
 	private void connectToServer() {
 		Socket myConnect = null;
 		other = new Vector<Socket>();
@@ -460,13 +440,15 @@ public class Client extends JFrame {
 
 			inputFromServer = new ObjectInputStream(myConnect.getInputStream());
 
-			outputToServer.writeObject("set");
+//			outputToServer.writeObject("set");
 
 			int port = (int) inputFromServer.readObject();
 			id = port - 1;
 
 			Thread listen = new Thread(new PortListen(port));
 			listen.start();
+			Thread update = new Thread(new UpdateClients());
+			update.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
